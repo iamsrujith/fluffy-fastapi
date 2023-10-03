@@ -6,7 +6,6 @@ from typing import Optional
 class Users(BaseModel):
     number: constr(pattern=r'^\+\d{1,15}$', min_length=6, max_length=16)
     email: Optional[EmailStr] = None
-    otp: Optional[str] = None
     full_name: Optional[str] = None
     birthdate: Optional[datetime] = None
     location: Optional[str] = None
@@ -16,3 +15,18 @@ class Users(BaseModel):
 
 class UserRegistration(BaseModel):
     number: constr(pattern=r'^\+\d{1,15}$', min_length=6, max_length=16)
+
+
+class ValidateOTP(BaseModel):
+    number: constr(pattern=r'^\+\d{1,15}$', min_length=6, max_length=16)
+    otp: str
+
+
+class TokenSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+
+
+class TokenPayload(BaseModel):
+    sub: str = None
+    exp: int = None
