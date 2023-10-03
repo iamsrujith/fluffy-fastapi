@@ -8,13 +8,13 @@ from managers import crypt
 from database.manager import get_db
 from managers.token import get_current_user
 
-
 app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
 
+
 def generate_otp():
-    otp = str(randint(1000,9999))
+    otp = str(randint(1000, 9999))
     hashed_otp = crypt.get_password_hash(otp)
     return otp, hashed_otp
 
@@ -56,7 +56,7 @@ async def validate_number(data: pydantic.UserRegistration, db: Session = Depends
         )
 
 
-@app.post('/validate-otp',description="Creates tokens from validating OTP", tags=['validation'])
+@app.post('/validate-otp', description="Creates tokens from validating OTP", tags=['validation'])
 async def validate_otp(data: pydantic.ValidateOTP, db: Session = Depends(get_db)):
     otp = data.otp
     if otp:
@@ -76,7 +76,7 @@ async def validate_otp(data: pydantic.ValidateOTP, db: Session = Depends(get_db)
             status_code=status.HTTP_403_FORBIDDEN,
             detail="OTP not found"
         )
-    
+
 
 @app.get('/me', response_model=pydantic.Users, tags=['user'])
 async def get_me(user: pydantic.Users = Depends(get_current_user)):
@@ -84,10 +84,10 @@ async def get_me(user: pydantic.Users = Depends(get_current_user)):
 
 
 @app.put('/me', response_model=pydantic.Users, tags=['user'])
-async def update_user(user_data: pydantic.Users, user: pydantic.Users = Depends(get_current_user), 
+async def update_user(user_data: pydantic.Users, user: pydantic.Users = Depends(get_current_user),
                       db: Session = Depends(get_db)):
     user_db = db.query(User).filter_by(number=user.number).first()
-    
+
     if user_db is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
