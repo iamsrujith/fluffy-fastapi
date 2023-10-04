@@ -30,3 +30,11 @@ class TokenSchema(BaseModel):
 class TokenPayload(BaseModel):
     sub: str = None
     exp: int = None
+
+
+class RefreshToken(BaseModel):
+    token: str = None
+
+class UserGallery(BaseModel):
+    name: str
+    image_data: str

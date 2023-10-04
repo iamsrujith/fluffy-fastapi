@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, Date, DateTime, Boolean, ForeignKey
+from sqlalchemy.orm import Relationship
 from database.manager import Base
 from datetime import datetime
 
@@ -17,6 +18,18 @@ class User(Base):
     created = Column(DateTime, default=datetime.utcnow)
     updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     completed = Column(Boolean, default=False)
+    galleries = Relationship("UserGallery", back_populates="owner")
+
+
+class UserGallery(Base):
+    __tablename__ = "gallery"
+    id = Column(Integer, primary_key= True, index= True)
+    name = Column(String, index=True)
+    image_data = Column(String)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner =  Relationship("User", back_populates="galleries")
+    created = Column(DateTime, default=datetime.utcnow)
+    updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 

@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 from typing import Union, Any
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-from jose import jwt
+from jose import jwt, JWTError
 
 SECRET_KEY = "a915f7e4af1a5a804e4ffe5a15b9027ca66a52b152e485f05cdaf34c044d72b4"
 REFRESH_TOKEN_SECRET_KEY = "7161c05d364f05ba4b3fede3c3fcdfc051a7520e3317fbb625abcfa573397d06"
@@ -41,3 +41,12 @@ def create_refresh_token(subject: Union[str, Any], expires_delta: timedelta = No
         to_encode = {"exp": expires_delta, "sub": str(subject)}
         encoded_jwt = jwt.encode(to_encode, REFRESH_TOKEN_SECRET_KEY, ALGORITHM)
         return encoded_jwt
+
+
+def verify_refresh_token(token: str) -> Union[dict, None]:
+    try:
+        payload = jwt.decode(token, REFRESH_TOKEN_SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        return None
+
