@@ -121,28 +121,25 @@ async def update_user(user_data: pydantic.Users, user: pydantic.Users = Depends(
 async def add_images(data: UploadFile = File(...), db: Session = Depends(get_db), 
                      user: pydantic.Users = Depends(get_current_user)):
 
-    # try:
-    file_extension = data.filename.split(".")[-1]
-    file_name = f"user_{user.id}_main.{file_extension}"
-    file_path = os.path.join("Gallery", file_name)
-    print(file_extension)
-    print(file_name)
-    print(file_path)
+    try:
+        file_extension = data.filename.split(".")[-1]
+        file_name = f"user_{user.id}_main.{file_extension}"
+        file_path = os.path.join("Gallery", file_name)
 
-    with open(file_path, "wb") as file:
-        file.write(data.file.read())
+        with open(file_path, "wb") as file:
+            file.write(data.file.read())
 
-    user_gallery = models.UserGallery(
-        name = file_name,
-        image_data = file_path,
-        owner = user
-    )
-    db.add(user_gallery)
-    db.commit()
-    db.refresh(user_gallery)
-    return {"success": "image has been uploaded"}
-    # except Exception as e:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         detail="Error saving the image"
-        # )
+        user_gallery = models.UserGallery(
+            name = file_name,
+            image_data = file_path,
+            owner = user
+        )
+        db.add(user_gallery)
+        db.commit()
+        db.refresh(user_gallery)
+        return {"success": "image has been uploaded"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error saving the image"
+        )
