@@ -7,7 +7,7 @@ from jose import jwt, JWTError
 SECRET_KEY = "a915f7e4af1a5a804e4ffe5a15b9027ca66a52b152e485f05cdaf34c044d72b4"
 REFRESH_TOKEN_SECRET_KEY = "7161c05d364f05ba4b3fede3c3fcdfc051a7520e3317fbb625abcfa573397d06"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

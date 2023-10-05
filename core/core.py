@@ -95,12 +95,28 @@ async def create_access_token(token: pydantic.RefreshToken, db: Session = Depend
     )
     
 
-@app.get('/me', response_model=pydantic.Users, tags=['user'])
+@app.get('/me', response_model=pydantic.UserData, tags=['user'])
 async def get_me(user: pydantic.Users = Depends(get_current_user)):
-    return user
+    user_data = pydantic.UserData(
+        number=user.number,
+        gender=user.gender,
+        location=user.location,
+        birthdate=user.birthdate,
+        email=user.email,
+        full_name=user.full_name,
+        gallery=[
+            pydantic.UserGallery(name=gallery.name, image_data=gallery.image_data)
+            for gallery in user.galleries
+        ],
+        tag=[
+            pydantic.UserTags(tag=tag.tag)
+            for tag in user.tags
+        ],
+    )
+    return user_data
 
 
-@app.put('/me', response_model=pydantic.Users, tags=['user'])
+@app.put('/update', response_model=pydantic.Users, tags=['user'])
 async def update_user(user_data: pydantic.Users, user: pydantic.Users = Depends(get_current_user),
                       db: Session = Depends(get_db)):
     user_db = db.query(User).filter_by(number=user.number).first()
@@ -110,7 +126,7 @@ async def update_user(user_data: pydantic.Users, user: pydantic.Users = Depends(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="user not found"
         )
-    for field, value in user_data.model_dump().items():
+    for field, value in user_data.model_dump(exclude_unset=True).items():
         setattr(user_db, field, value)
     db.commit()
     db.refresh(user_db)
@@ -123,7 +139,7 @@ async def add_images(data: UploadFile = File(...), db: Session = Depends(get_db)
 
     try:
         file_extension = data.filename.split(".")[-1]
-        file_name = f"user_{user.id}_main.{file_extension}"
+        file_name = f"user_{user.id}_{data.filename}.{file_extension}"
         file_path = os.path.join("Gallery", file_name)
 
         with open(file_path, "wb") as file:
@@ -143,3 +159,27 @@ async def add_images(data: UploadFile = File(...), db: Session = Depends(get_db)
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error saving the image"
         )
+
+
+@app.post("/add-tag", tags=['user'])
+async def add_tag(data: pydantic.UserTags, db: Session = Depends(get_db),
+                  user: pydantic.Users = Depends(get_current_user)):
+    if data.tag:
+        try:
+            for tag_name in data.tag:
+                tag = models.UserTag(tag= tag_name, owner_id= user.id)
+                db.add(tag)
+            db.commit()
+            return {"success": "Tags added successfully"}
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail= f"Error adding tags: {str(e)}"
+            )
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="No Tags provided"
+        )
+            

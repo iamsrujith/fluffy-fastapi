@@ -1,15 +1,34 @@
-from datetime import datetime
+from datetime import datetime,date
 from pydantic import BaseModel, EmailStr, constr
-from typing import Optional
+from typing import Optional, List
 
 
-class Users(BaseModel):
+class UserGallery(BaseModel):
+    name: str
+    image_data: str
+
+
+class UserTags(BaseModel):
+    tag: str
+
+
+class UserData(BaseModel):
     number: constr(pattern=r'^\+\d{1,15}$', min_length=6, max_length=16)
     email: Optional[EmailStr] = None
     full_name: Optional[str] = None
-    birthdate: Optional[datetime] = None
+    birthdate: Optional[date] = None
     location: Optional[str] = None
-    profile_picture: Optional[str] = None
+    gender: Optional[str] = None
+    gallery: List[UserGallery]
+    tag: List[UserTags] = None
+
+
+class Users(BaseModel):
+    number: Optional[constr(pattern=r'^\+\d{1,15}$', min_length=6, max_length=16)] = None
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    birthdate: Optional[date] = None
+    location: Optional[str] = None
     gender: Optional[str] = None
 
 
@@ -34,7 +53,3 @@ class TokenPayload(BaseModel):
 
 class RefreshToken(BaseModel):
     token: str = None
-
-class UserGallery(BaseModel):
-    name: str
-    image_data: str

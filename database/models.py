@@ -19,6 +19,7 @@ class User(Base):
     updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     completed = Column(Boolean, default=False)
     galleries = Relationship("UserGallery", back_populates="owner")
+    tags = Relationship("UserTag", back_populates="owner")
 
 
 class UserGallery(Base):
@@ -30,6 +31,14 @@ class UserGallery(Base):
     owner =  Relationship("User", back_populates="galleries")
     created = Column(DateTime, default=datetime.utcnow)
     updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class UserTag(Base):
+    __tablename__ = "usertags"
+    id = Column(Integer, primary_key=True, index=True)
+    tag = Column(String)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner = Relationship("User", back_populates="tags")
 
 
 
